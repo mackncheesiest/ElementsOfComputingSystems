@@ -1,0 +1,25 @@
+CHIP PcController {
+
+	IN jmpCode[3], instrucType, outputIsZero, outputIsNegative;
+	OUT pcLd, pcInc;
+
+	PARTS:
+	Not(in=outputIsNegative,out=outputNonNegative);
+	Not(in=outputIsZero,out=outputNonZero);
+	And(a=outputNonNegative,b=outputNonZero,out=outputIsPositive);
+	
+	//Check if "JLZ && < 0 || JEZ && == 0 || JGZ && > 0"
+	And(a=jmpCode[2],b=outputIsNegative,out=jumpBecauseNegative);
+	And(a=jmpCode[1],b=outputIsZero,out=jumpBecauseZero);
+	And(a=jmpCode[0],b=outputIsPositive,out=jumpBecausePositive);
+	//Reduce that decision down to a single bit
+	Or(a=jumpBecauseNegative,b=jumpBecauseZero,out=or1);
+	Or(a=or1,b=jumpBecausePositive,out=or2);
+	//Check the instruction type (if A type, pcInc=1 and pcLd=0 regardless)
+	Not(in=instrucType,out=isCType);
+	And(a=or2,b=isCType,out=pcLdDecision);
+	
+	//Pass through the final outputs
+	Not(in=pcLdDecision,out=pcInc);
+	Or(a=pcLdDecision,b=pcLdDecision,out=pcLd);
+}

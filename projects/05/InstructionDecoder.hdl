@@ -1,0 +1,46 @@
+CHIP InstructionDecoder {
+
+	IN instruc[16];
+		//C type signals
+	OUT selectMforY, zx, nx, zy, ny, f, no, dLd, aLd, mLd,
+		jmpCode[3],
+		//A type signals
+		aMuxFromALUorConstant,
+		addrConstant[15];
+
+	PARTS:
+	
+	//--------------------Check Instruction Type---------------------
+	//Check if instruction type is A (MSB == 0)
+	//Just ignore the definition of C type as starting with "111". A single "1" in MSB is good enough for me
+	Xor(a=instruc[15],b=false,out=xorInstrucMSB);
+	Not(in=xorInstrucMSB,out=xnorInstrucMSB);
+	And(a=xnorInstrucMSB,b=true,out=isAType);
+	
+	//--------------------Handle A Type---------------------
+	//Use an OR gate as a passthrough for instruc[0..14]
+	Or16(a[0..14]=instruc[0..14],a[15]=false,b[0..14]=instruc[0..14],b[15]=false,out[0..14]=addrConstant,out[15]=null);
+
+	//--------------------Handle C Type---------------------
+	//Extract whether the "y" ALU input is A or M
+	Or(a=instruc[12],b=instruc[12],out=selectMforY);
+	//Extract the ALU signals from the corresponding bits in the instruction with "passthrough" OR gates
+	Or(a=instruc[11],b=instruc[11],out=zx);
+	Or(a=instruc[10],b=instruc[10],out=nx);
+	Or(a=instruc[9],b=instruc[9],out=zy);
+	Or(a=instruc[8],b=instruc[8],out=ny);
+	Or(a=instruc[7],b=instruc[7],out=f);
+	Or(a=instruc[6],b=instruc[6],out=no);
+	
+	//Set A, M, and D load reg bits
+	Or(a=instruc[5],b=isAType,out=aLd);
+	Or(a=isAType,b=isAType,out=aMuxFromALUorConstant);
+	Not(in=isAType,out=isCType);
+	And(a=instruc[4],b=isCType,out=dLd);
+	And(a=instruc[3],b=isCType,out=mLd);
+	
+	//Passthrough for jump code
+	Or(a=instruc[2],b=instruc[2],out=jmpCode[2]);
+	Or(a=instruc[1],b=instruc[1],out=jmpCode[1]);
+	Or(a=instruc[0],b=instruc[0],out=jmpCode[0]);
+}

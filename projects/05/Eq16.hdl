@@ -1,0 +1,11 @@
+CHIP Eq16 {
+
+	IN a[16], b[16];
+	OUT eq;
+
+	PARTS:
+	Xor16(a=a,b=b,out=xor16Out);
+	Not16(in=xor16Out,out=not16Out);
+	And16Way(in=not16Out,out=eq);
+
+}

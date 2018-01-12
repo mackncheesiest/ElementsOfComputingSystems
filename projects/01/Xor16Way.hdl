@@ -1,0 +1,24 @@
+CHIP Xor16Way {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    Xor(a=in[0],b=in[1],out=out1);
+	Xor(a=in[2],b=in[3],out=out2);
+	Xor(a=in[4],b=in[5],out=out3);
+	Xor(a=in[6],b=in[7],out=out4);
+	Xor(a=in[8],b=in[9],out=out5);
+	Xor(a=in[10],b=in[11],out=out6);
+	Xor(a=in[12],b=in[13],out=out7);
+	Xor(a=in[14],b=in[15],out=out8);
+	
+	Xor(a=out1,b=out2,out=out9);
+	Xor(a=out3,b=out4,out=out10);
+	Xor(a=out5,b=out6,out=out11);
+	Xor(a=out7,b=out8,out=out12);
+	
+	Xor(a=out9,b=out10,out=out13);
+	Xor(a=out11,b=out12,out=out14);
+	
+	Xor(a=out13,b=out14,out=out);
+}
